@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 
@@ -12,7 +13,14 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
-            }
+            },
+            {
+                test: /resources/,
+                loader: 'file-loader',
+                options: {
+                    name: 'resources',
+                },
+            },
         ],
     },
     resolve: {
@@ -28,8 +36,17 @@ module.exports = {
             title: 'SoftGame'
         }),
         new webpack.ProvidePlugin({
-            PIXI: 'pixi.js-legacy'
-        })],
+            PIXI: 'pixi.js'
+        }),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: './resources/',
+                    to: './resources'
+                }
+            ],
+        }),
+    ],
     devServer: {
         contentBase: path.join(__dirname, 'dist'),
         compress: true,
