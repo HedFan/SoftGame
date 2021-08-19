@@ -20,11 +20,10 @@ export class MenuView extends PIXI.Container implements GarbageCollect {
     private readonly _buttonContainer = new PIXI.Container();
     private readonly _choseMenuSubject$ = new Subject<ButtonState>();
 
-
     constructor() {
         super();
 
-        this._buttonContainer.position.set(100, 50);
+        this._buttonContainer.position.set(window.innerWidth / 2.2, 50);
 
         const textFirst = fromCacheAsTexture('number-1');
         const textSecond = fromCacheAsTexture('number-2');
@@ -46,7 +45,6 @@ export class MenuView extends PIXI.Container implements GarbageCollect {
         this._thirdMenuButton.buttonMode = true;
         this._thirdMenuButton.hitArea = new PIXI.Rectangle(0, 0, 30, 30);
         this._thirdMenuButton.y = 180;
-
 
         const clickButton$ = merge(
             fromEvent(this._firstMenuButton, 'pointerdown').pipe(mapTo(ButtonState.FIRST_MENU_BUTTON)),
@@ -81,5 +79,4 @@ export class MenuView extends PIXI.Container implements GarbageCollect {
     get choseMenu$(): Observable<ButtonState> {
         return this._choseMenuSubject$;
     }
-
 }

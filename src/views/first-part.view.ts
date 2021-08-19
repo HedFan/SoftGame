@@ -1,18 +1,17 @@
 import { Subject, fromEvent, Observable } from 'rxjs';
-import { take, delay } from 'rxjs/operators';
-
+import { delay } from 'rxjs/operators';
 import { Tween } from '@tweenjs/tween.js';
+
+import { GarbageBag, GarbageCollect, getRandom, repeat, fromCacheAsSprite, createButton } from '../utils';
 
 const TWEEN = require('@tweenjs/tween.js');
 const Stats = require('stats-js');
 
-import { GarbageBag, GarbageCollect, getRandom, repeat, fromCacheAsSprite, fromCacheAsTexture } from '../utils';
-
 const cardsQuantity = 144;
 
 interface Coordinates {
-    x: number,
-    y: number
+    x: number;
+    y: number;
 }
 
 export class FirstPartView extends PIXI.Container implements GarbageCollect {
@@ -23,11 +22,11 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
     private readonly _homeButton: PIXI.Sprite;
     private readonly _tweenGroup = new TWEEN.Group();
     private readonly _completeOpenAnimationSubject$ = new Subject<void>();
-    private readonly backToMenuPageSubject$ = new Subject<void>();
+    private readonly _backToMenuPageSubject$ = new Subject<void>();
+    private readonly _stats = new Stats();
     private _timeout: NodeJS.Timeout | undefined;
     private _isPlayFlag: boolean = false;
     private _playCards = new Array<PIXI.Sprite>();
-    private _stats = new Stats();
     private _requestAnimation: number | undefined;
     private _statsRequestAnimation: number | undefined;
     private _stateRunning: boolean = true;
@@ -44,19 +43,11 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
         document.body.appendChild(dom);
         this._stats.showPanel(0);
 
-        const buttonTexture = fromCacheAsTexture('start-button');
-        this._startButton = new PIXI.Sprite(buttonTexture);
-        this._startButton.interactive = true;
-        this._startButton.buttonMode = true;
-        this._startButton.hitArea = new PIXI.Rectangle(0, 0, 130, 49);
+        this._startButton = createButton('start-button', 130, 49);
         this._startButton.position.set(120, 10);
         const clickButton$ = fromEvent(this._startButton, 'pointerdown');
 
-        const homeButtonTexture = fromCacheAsTexture('home-button');
-        this._homeButton = new PIXI.Sprite(homeButtonTexture);
-        this._homeButton.interactive = true;
-        this._homeButton.buttonMode = true;
-        this._homeButton.hitArea = new PIXI.Rectangle(0, 0, 49, 49);
+        this._homeButton = createButton('home-button', 49, 49);
         this._homeButton.position.set(300, 10);
         const clickHomeButton$ = fromEvent(this._homeButton, 'pointerdown');
 
@@ -73,15 +64,11 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
                     this._isPlayFlag = false;
                     this._startButton.interactive = true;
                 });
-            })
+            });
 
-        this._garbageBag
-            .completable$(clickButton$)
-            .subscribe(() => this.clickPlayButton());
+        this._garbageBag.completable$(clickButton$).subscribe(() => this.clickPlayButton());
 
-        this._garbageBag
-            .completable$(clickHomeButton$)
-            .subscribe(() => this.backToMenuPageSubject$.next());
+        this._garbageBag.completable$(clickHomeButton$).subscribe(() => this._backToMenuPageSubject$.next());
 
         this._garbageBag.add(this._stats);
     }
@@ -94,7 +81,7 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
     }
 
     show(): void {
-        if(!this._playCards.length && !this._playCardsContainer.children.length){
+        if (!this._playCards.length && !this._playCardsContainer.children.length) {
             this.buildCards();
         }
         this.visible = true;
@@ -112,13 +99,13 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
         this._tweenGroup.removeAll();
         this._playCards = [];
         this._playCardsContainer.removeChildren();
-        if(this._timeout){
+        if (this._timeout) {
             clearTimeout(this._timeout);
         }
     }
 
     private clickPlayButton(): void {
-        if(this._isPlayFlag){
+        if (this._isPlayFlag) {
             return;
         }
         this.buildAnimation(false);
@@ -136,18 +123,18 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
                 this._playCards.reverse();
                 resolve();
             });
-        })
+        });
     }
 
     private runTween(tweenArray: Array<Tween<PIXI.Sprite>>, index: number = cardsQuantity - 1): Promise<void> {
-        if(index < 0) {
+        if (index < 0) {
             return Promise.resolve();
         }
         return new Promise(resolve => {
-           this._timeout = setTimeout(() => {
-               tweenArray[index].start();
-               return this.runTween(tweenArray, index - 1).then(() => resolve());
-            }, 1000)
+            this._timeout = setTimeout(() => {
+                tweenArray[index].start();
+                return this.runTween(tweenArray, index - 1).then(() => resolve());
+            }, 1000);
         });
     }
 
@@ -159,12 +146,12 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
             playCards.forEach((sprite, index) => {
                 const orderIndex = cardsQuantity - index;
                 const xCoordinate = orderIndex * 5;
-                const newCoordinates = { x: xCoordinate, y: sprite.y + 200 * isReversIndex};
+                const newCoordinates = { x: xCoordinate, y: sprite.y + 200 * isReversIndex };
                 const onComplete = () => resolve();
                 const tweenCard = this.tweenAnimation(newCoordinates, sprite, orderIndex, onComplete);
                 this._tweenGroup.add(tweenCard);
-            })
-        })
+            });
+        });
     }
 
     private tweenAnimation(
@@ -172,16 +159,17 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
         owner: PIXI.Sprite,
         orderIndex: number,
         onComplete: () => void,
-        duration: number = 2000): Tween<PIXI.Sprite> {
+        duration: number = 2000
+    ): Tween<PIXI.Sprite> {
         return new TWEEN.Tween(owner)
             .to({ x: to.x, y: to.y }, duration)
             .easing(TWEEN.Easing.Quadratic.Out)
-            .onUpdate(({ y, x }: { x: number, y: number }) => {
+            .onUpdate(({ y, x }: { x: number; y: number }) => {
                 owner.zIndex = orderIndex;
                 owner.x = x;
                 owner.y = y;
             })
-            .onComplete(() => onComplete())
+            .onComplete(() => onComplete());
     }
 
     private buildCards(): void {
@@ -189,43 +177,45 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
             const numberOfCard = getRandom(0, 52);
             const card = fromCacheAsSprite('card-' + numberOfCard);
             card.x = value * 5;
+            const scaleSet = Math.min(window.innerWidth / 1000, 1);
+            card.scale.set(scaleSet);
             this._playCards.push(card);
             this._playCardsContainer.addChild(card);
-        })
+        });
     }
 
     private cancelAnimationListener(): void {
         this._animationRunning = false;
-        if(this._requestAnimation !== undefined) {
+        if (this._requestAnimation !== undefined) {
             cancelAnimationFrame(this._requestAnimation);
         }
     }
 
     private cancelStatsListener(): void {
         this._stateRunning = false;
-        if(this._statsRequestAnimation !== undefined) {
+        if (this._statsRequestAnimation !== undefined) {
             cancelAnimationFrame(this._statsRequestAnimation);
         }
     }
 
-    private statsAnimate = () => {
-        if(!this._stateRunning){
+    private readonly statsAnimate = () => {
+        if (!this._stateRunning) {
             return;
         }
         this._stats.begin();
         this._stats.end();
         requestAnimationFrame(this.statsAnimate);
-    }
+    };
 
-    private cardAnimate = (time: number) => {
-        if(!this._animationRunning){
+    private readonly cardAnimate = (time: number) => {
+        if (!this._animationRunning) {
             return;
         }
         TWEEN.update(time);
         requestAnimationFrame(this.cardAnimate);
-    }
+    };
 
     get backToMenuPage$(): Observable<void> {
-        return this.backToMenuPageSubject$;
+        return this._backToMenuPageSubject$;
     }
 }
