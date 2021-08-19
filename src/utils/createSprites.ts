@@ -11,6 +11,8 @@ export function createSprites(): void {
     PIXI.Texture.addToCache(PIXI.Texture.from('resources/start-button.png'), 'start-button');
     PIXI.Texture.addToCache(PIXI.Texture.from('resources/home-button.png'), 'home-button');
 
+    addIconTexture();
+
     const cardsTexture = PIXI.Texture.from('resources/playing-cards.png');
 
     let rowIndex = 0;
@@ -21,15 +23,20 @@ export function createSprites(): void {
             rowIndex = 0;
             colIndex = Math.floor(currentValue / 13);
         }
-        const texture =
-            new PIXI.Texture(
-                cardsTexture.baseTexture,
-                new PIXI.Rectangle(width * rowIndex, height * colIndex, width, height),
-                cardsTexture.orig,
-                cardsTexture.trim
-            );
+        const texture = new PIXI.Texture(
+            cardsTexture.baseTexture,
+            new PIXI.Rectangle(width * rowIndex, height * colIndex, width, height),
+            cardsTexture.orig,
+            cardsTexture.trim
+        );
         PIXI.Texture.addToCache(texture, 'card-' + currentValue);
-    })
+    });
+}
+
+function addIconTexture() {
+    repeat(6).map(value => {
+        PIXI.Texture.addToCache(PIXI.Texture.from(`resources/icon-${value}.png`), 'icon-' + value);
+    });
 }
 
 export function fromCacheAsTexture(textureName: string): PIXI.Texture {
@@ -39,4 +46,3 @@ export function fromCacheAsTexture(textureName: string): PIXI.Texture {
 export function fromCacheAsSprite(textureName: string): PIXI.Sprite {
     return new PIXI.Sprite(fromCacheAsTexture(textureName));
 }
-
