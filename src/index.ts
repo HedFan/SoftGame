@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js-legacy';
+import { GameViewImpl } from './views';
 
 const app = new PIXI.Application({
     width: window.innerWidth,
@@ -6,3 +6,8 @@ const app = new PIXI.Application({
     backgroundColor: 0x2c3e50
 });
 document.body.appendChild(app.view);
+
+const gameContainer = new GameViewImpl();
+gameContainer.initialize();
+
+app.stage.addChild(gameContainer);
