@@ -1,6 +1,4 @@
-import { Subject, fromEvent, Observable } from 'rxjs';
-
-import { GarbageBag, GarbageCollect, createButton, repeat, fromCacheAsSprite, getRandom } from '../utils';
+import { GarbageBag, GarbageCollect, repeat, fromCacheAsSprite, getRandom } from '../utils';
 
 export const defaultGlyphs = [
     'Congrats!',
@@ -18,9 +16,6 @@ export const defaultGlyphs = [
 export class SecondPartView extends PIXI.Container implements GarbageCollect {
     readonly name = 'second-part-vew';
     private readonly _garbageBag = new GarbageBag();
-    private readonly _startButton: PIXI.Sprite;
-    private readonly _homeButton: PIXI.Sprite;
-    private readonly _backToMenuPageSubject$ = new Subject<void>();
     private readonly _spritesArray = new Array<PIXI.Sprite>();
     private readonly _nameOfSpritesArray = new Array<string>();
     private _timeout: NodeJS.Timeout | undefined;
@@ -33,23 +28,9 @@ export class SecondPartView extends PIXI.Container implements GarbageCollect {
         this._contentContainer.visible = false;
         this._contentContainer.position.set(70, 150);
 
-        this._startButton = createButton('start-button', 130, 49);
-        this._startButton.position.set(120, 10);
-        const clickButton$ = fromEvent(this._startButton, 'pointerdown');
-
-        this._homeButton = createButton('home-button', 49, 49);
-        this._homeButton.position.set(300, 10);
-        const clickHomeButton$ = fromEvent(this._homeButton, 'pointerdown');
-
         this.createArrayContent();
 
-        this.addChild(this._startButton);
-        this.addChild(this._homeButton);
         this.addChild(this._contentContainer);
-
-        this._garbageBag.completable$(clickButton$).subscribe(() => this.clickPlayButton());
-
-        this._garbageBag.completable$(clickHomeButton$).subscribe(() => this._backToMenuPageSubject$.next());
     }
 
     cleanGarbageCollect(): void {
@@ -69,7 +50,7 @@ export class SecondPartView extends PIXI.Container implements GarbageCollect {
         }
     }
 
-    private clickPlayButton(): void {
+    clickPlayButton(): void {
         if (this._isRunning) {
             return;
         }
@@ -127,9 +108,5 @@ export class SecondPartView extends PIXI.Container implements GarbageCollect {
         this._nameOfSpritesArray.push('icon-' + nameOfTexture);
         PIXI.Texture.addToCache(text.texture, 'icon-' + nameOfTexture);
         return new PIXI.Sprite(text.texture);
-    }
-
-    get backToMenuPageSecond$(): Observable<void> {
-        return this._backToMenuPageSubject$;
     }
 }
