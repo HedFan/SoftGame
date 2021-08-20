@@ -101,8 +101,12 @@ export class ThirdPartView extends PIXI.Container implements GarbageCollect {
     }
 
     clickPlayButton(): void {
+        this._particle.init();
+        // this._particle.emit() = true;
+        this._updateId = requestAnimationFrame(this.updateAnimation);
         this._simpleText.visible = true;
     }
+
     private readonly updateAnimation = () => {
         let now = Date.now();
         if(this._particle){
