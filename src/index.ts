@@ -11,3 +11,4 @@ const gameContainer = new GameViewImpl();
 gameContainer.initialize();
 
 app.stage.addChild(gameContainer);
+

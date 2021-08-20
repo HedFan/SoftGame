@@ -14,12 +14,18 @@ export class GameViewImpl extends PIXI.Container {
     private _firstPartView: FirstPartView | undefined;
     private _secondPartView: SecondPartView | undefined;
     private _thirdPartView: ThirdPartView | undefined;
+    private _renderer: PIXI.Renderer | undefined;
 
     initialize(): Promise<void> {
         PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
         return new Promise(resolve => {
             createSprites();
+            const rendererOptions = {
+                width: this.width,
+                height: this.height
+            };
+            this._renderer = new PIXI.Renderer(rendererOptions);
             this._menuView = new MenuView();
             this._topMenuView = new TopMenuView();
             this._firstPartView = new FirstPartView();
@@ -57,7 +63,14 @@ export class GameViewImpl extends PIXI.Container {
             this._garbageBag.completable$(startAnimation$).subscribe(value => this.startAnimationCall(value));
 
             this._garbageBag.completable$(stateStartButton).subscribe(value => this.topMenuView.setStartStateButton(value));
-
+            // const resize$ = merge(
+            //     fromEvent(window, 'resize'),
+            //     fromEvent(window, 'orientationchange'))
+            //     .pipe(debounceTime(200))
+            //
+            // this._garbageBag.completable$(resize$).subscribe(() => {
+            //     this.resize();
+            // })
             resolve();
         });
     }
@@ -103,6 +116,26 @@ export class GameViewImpl extends PIXI.Container {
                 break;
         }
     }
+
+    // private resize (): void {
+    //     const width = window.innerWidth;
+    //     const height = window.innerHeight;
+    //     if(this._renderer) {
+    //         this._renderer.resize(width, height);
+    //     }
+    //
+    //         const viewport = document.querySelector('meta[name=viewport]');
+    //         if (viewport) {
+    //             viewport.setAttribute(
+    //                 'content',
+    //                 'width=' +
+    //                 width +
+    //                 ', height=' +
+    //                 height +
+    //                 ', viewport-fit=cover, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0, minimal-ui'
+    //             );
+    //         }
+    // };
 
     get menuView(): MenuView {
         return unwrap(this._menuView, 'this._menuView is undefined');

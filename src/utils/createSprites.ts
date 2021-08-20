@@ -10,6 +10,8 @@ export function createSprites(): void {
     PIXI.Texture.addToCache(PIXI.Texture.from('resources/number-3.png'), 'number-3');
     PIXI.Texture.addToCache(PIXI.Texture.from('resources/start-button.png'), 'start-button');
     PIXI.Texture.addToCache(PIXI.Texture.from('resources/home-button.png'), 'home-button');
+    PIXI.Texture.addToCache(PIXI.Texture.from('resources/fire.png'), 'fire');
+    PIXI.Texture.addToCache(PIXI.Texture.from('resources/particle.png'), 'particle');
 
     addIconTexture();
 
