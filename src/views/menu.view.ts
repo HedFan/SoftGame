@@ -1,6 +1,5 @@
 import { Subject, fromEvent, merge, Observable } from 'rxjs';
 import { mapTo } from 'rxjs/operators';
-
 import * as PIXI from 'pixi.js';
 
 import { GarbageBag, GarbageCollect, fromCacheAsTexture } from '../utils';
@@ -23,7 +22,7 @@ export class MenuView extends PIXI.Container implements GarbageCollect {
     constructor() {
         super();
 
-        this._buttonContainer.position.set(window.innerWidth / 2.2, 50);
+        this._buttonContainer.position.set(100, 50);
 
         const textFirst = fromCacheAsTexture('number-1');
         const textSecond = fromCacheAsTexture('number-2');
@@ -57,11 +56,9 @@ export class MenuView extends PIXI.Container implements GarbageCollect {
         this._buttonContainer.addChild(this._thirdMenuButton);
         this.addChild(this._buttonContainer);
 
-        this._garbageBag
-            .completable$(clickButton$)
-            .subscribe((value) => {
-                this._choseMenuSubject$.next(value);
-            });
+        this._garbageBag.completable$(clickButton$).subscribe(value => {
+            this._choseMenuSubject$.next(value);
+        });
     }
 
     cleanGarbageCollect(): void {

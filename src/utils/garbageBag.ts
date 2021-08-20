@@ -21,7 +21,7 @@ export class GarbageBag implements GarbageCollect {
         } else if (isGarbageCollect(item)) {
             this._list.add(() => item.cleanGarbageCollect());
         } else {
-           console.log(`${item} doesn't contain this method`);
+            console.log(`${item} doesn't contain this method`);
         }
     }
 

@@ -124,8 +124,8 @@ export class SecondPartView extends PIXI.Container implements GarbageCollect {
         });
         text.updateText(true);
         const nameOfTexture = index + 6;
-        this._nameOfSpritesArray.push('card-' + nameOfTexture);
-        PIXI.Texture.addToCache(text.texture, 'card-' + nameOfTexture);
+        this._nameOfSpritesArray.push('icon-' + nameOfTexture);
+        PIXI.Texture.addToCache(text.texture, 'icon-' + nameOfTexture);
         return new PIXI.Sprite(text.texture);
     }
 

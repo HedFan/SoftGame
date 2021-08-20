@@ -31,6 +31,7 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
     private _statsRequestAnimation: number | undefined;
     private _stateRunning: boolean = true;
     private _animationRunning: boolean = true;
+    private _cardsAlreadyBuild: boolean = true;
 
     constructor() {
         super();
@@ -97,8 +98,10 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
         this.cancelAnimationListener();
         this.cancelStatsListener();
         this._tweenGroup.removeAll();
-        this._playCards = [];
-        this._playCardsContainer.removeChildren();
+        if (!this._cardsAlreadyBuild) {
+            this._playCards = [];
+            this._playCardsContainer.removeChildren();
+        }
         if (this._timeout) {
             clearTimeout(this._timeout);
         }
@@ -115,6 +118,7 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
     private startAnimation(): Promise<void> {
         this._isPlayFlag = true;
         this._animationRunning = true;
+        this._cardsAlreadyBuild = false;
         this._startButton.interactive = false;
         this._requestAnimation = requestAnimationFrame(this.cardAnimate);
         return new Promise<void>(resolve => {
@@ -173,6 +177,7 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
     }
 
     private buildCards(): void {
+        this._cardsAlreadyBuild = true;
         repeat(cardsQuantity).map(value => {
             const numberOfCard = getRandom(0, 52);
             const card = fromCacheAsSprite('card-' + numberOfCard);
