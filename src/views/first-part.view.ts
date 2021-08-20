@@ -1,4 +1,4 @@
-import { Subject, fromEvent, Observable } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Tween } from '@tweenjs/tween.js';
 
@@ -18,11 +18,9 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
     readonly name = 'first-part-vew';
     private readonly _garbageBag = new GarbageBag();
     private readonly _playCardsContainer = new PIXI.Container();
-    private readonly _startButton: PIXI.Sprite;
-    private readonly _homeButton: PIXI.Sprite;
     private readonly _tweenGroup = new TWEEN.Group();
     private readonly _completeOpenAnimationSubject$ = new Subject<void>();
-    private readonly _backToMenuPageSubject$ = new Subject<void>();
+    private readonly _stateStartButtonSubject$ = new Subject<boolean>();
     private readonly _stats = new Stats();
     private _timeout: NodeJS.Timeout | undefined;
     private _isPlayFlag: boolean = false;
@@ -44,17 +42,7 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
         document.body.appendChild(dom);
         this._stats.showPanel(0);
 
-        this._startButton = createButton('start-button', 130, 49);
-        this._startButton.position.set(120, 10);
-        const clickButton$ = fromEvent(this._startButton, 'pointerdown');
-
-        this._homeButton = createButton('home-button', 49, 49);
-        this._homeButton.position.set(300, 10);
-        const clickHomeButton$ = fromEvent(this._homeButton, 'pointerdown');
-
         this.addChild(this._playCardsContainer);
-        this.addChild(this._startButton);
-        this.addChild(this._homeButton);
 
         this._garbageBag
             .completable$(this._completeOpenAnimationSubject$)
@@ -63,14 +51,10 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
                 this.buildAnimation(true);
                 this.startAnimation().then(() => {
                     this._isPlayFlag = false;
-                    this._startButton.interactive = true;
+                    this._stateStartButtonSubject$.next(true);
+                    // this._startButton.interactive = true;
                 });
             });
-
-        this._garbageBag.completable$(clickButton$).subscribe(() => this.clickPlayButton());
-
-        this._garbageBag.completable$(clickHomeButton$).subscribe(() => this._backToMenuPageSubject$.next());
-
         this._garbageBag.add(this._stats);
     }
 
@@ -88,7 +72,9 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
         this.visible = true;
         this._statsRequestAnimation = requestAnimationFrame(this.statsAnimate);
         this._stateRunning = true;
-        this._startButton.interactive = true;
+        this._stateStartButtonSubject$.next(true);
+
+        // this._startButton.interactive = true;
         this._animationRunning = true;
         this._isPlayFlag = false;
     }
@@ -107,7 +93,7 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
         }
     }
 
-    private clickPlayButton(): void {
+    clickPlayButton(): void {
         if (this._isPlayFlag) {
             return;
         }
@@ -119,7 +105,9 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
         this._isPlayFlag = true;
         this._animationRunning = true;
         this._cardsAlreadyBuild = false;
-        this._startButton.interactive = false;
+        this._stateStartButtonSubject$.next(false);
+
+        // this._startButton.interactive = false;
         this._requestAnimation = requestAnimationFrame(this.cardAnimate);
         return new Promise<void>(resolve => {
             const tweenArray = this._tweenGroup.getAll();
@@ -220,7 +208,7 @@ export class FirstPartView extends PIXI.Container implements GarbageCollect {
         requestAnimationFrame(this.cardAnimate);
     };
 
-    get backToMenuPage$(): Observable<void> {
-        return this._backToMenuPageSubject$;
+    get stateStartButton(): Observable<boolean> {
+        return this._stateStartButtonSubject$;
     }
 }
