@@ -1,12 +1,12 @@
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
-const webpack = require('webpack');
 
 module.exports = {
     entry: './src/index.ts',
-    mode: "development",
-    devtool: 'inline-source-map',
+    mode: 'development',
+    devtool: 'source-map',
     module: {
         rules: [
             {
@@ -20,7 +20,7 @@ module.exports = {
                 options: {
                     name: 'resources',
                 },
-            },
+            }
         ],
     },
     resolve: {
@@ -36,7 +36,7 @@ module.exports = {
             title: 'SoftGame'
         }),
         new webpack.ProvidePlugin({
-            PIXI: 'pixi.js'
+            PIXI: 'pixi.js-legacy'
         }),
         new CopyWebpackPlugin({
             patterns: [
